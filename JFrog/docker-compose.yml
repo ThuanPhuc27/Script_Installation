@@ -1,0 +1,19 @@
+services:
+  jfrog:
+    image: releases-docker.jfrog.io/jfrog/artifactory-oss:7.77.5
+    container_name: jfrog
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    volumes:
+      - artifactory_data:/var/opt/jfrog/artifactory
+    restart: unless-stopped
+    networks:
+      - PrviNetwork
+
+volumes:
+  artifactory_data:
+
+networks:
+  PrviNetwork:
+    external: true

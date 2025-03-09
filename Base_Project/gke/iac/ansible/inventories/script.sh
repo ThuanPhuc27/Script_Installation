@@ -1,0 +1,1 @@
+cat /root/ansible/inventories/'hosts.ini'$'\r' >> /root/ansible/inventories/hosts.ini

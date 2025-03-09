@@ -1,0 +1,7 @@
+- name: Install Docker & Jenkins
+  hosts: jenkins-server
+  become: yes
+  roles:
+    - teleport
+    - docker
+    - jenkins

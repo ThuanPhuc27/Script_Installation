@@ -1,0 +1,7 @@
+- name: Install Docker & Rancher
+  hosts: rancher-server
+  become: yes
+  roles:
+    - teleport
+    - docker
+    - rancher

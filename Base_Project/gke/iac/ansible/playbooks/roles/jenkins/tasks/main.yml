@@ -1,0 +1,39 @@
+---
+- name: Kill and remove Jenkins container if it's running
+  command: docker rm -f {{ jenkins_container_name }}
+  ignore_errors: yes
+
+- name: Create directory for Jenkins project
+  file:
+    path: /tools/jenkins
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml for Jenkins to target machine
+  template:
+    src: docker-compose.yml.j2  
+    dest: /tools/jenkins/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create docker network if it does not exist
+  docker_network:
+    name: PrviNetwork
+    state: present
+  ignore_errors: true
+
+- name: Run Docker Compose to deploy Jenkins
+  command:
+    cmd: "docker-compose -f /tools/jenkins/docker-compose.yml up -d"
+    chdir: /tools/jenkins
+
+- name: Check if Jenkins container is running
+  command: docker ps -q -f name=jenkins
+  register: jenkins_container
+  failed_when: jenkins_container.stdout == ""
+  changed_when: false
+
+- name: Display Jenkins container status
+  debug:
+    msg: "Jenkins container is up and running."

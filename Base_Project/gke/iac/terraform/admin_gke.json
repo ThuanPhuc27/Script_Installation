@@ -1,0 +1,8 @@
+{
+  "type": "Sample",
+  "project_id": "sample",
+  "private_key_id": "9407204a66da5febe2562773cad5d9c7e0fec2ac",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n\n-----END PRIVATE KEY-----\n",
+  "client_email": "sample@sample.iam.gserviceaccount.com",
+  "client_id": "112711111896657066104"
+}

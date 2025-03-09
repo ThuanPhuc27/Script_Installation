@@ -1,0 +1,6 @@
+- name: Install Docker & Rancher
+  hosts: load-balancing
+  become: yes
+  roles:
+    - teleport
+    - nginx

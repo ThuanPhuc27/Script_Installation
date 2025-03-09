@@ -1,0 +1,113 @@
+- name: Update package list
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Install Certbot
+  ansible.builtin.apt:
+    name: certbot
+    state: present
+    update_cache: yes
+
+- name: Stop Nginx before issuing SSL
+  ansible.builtin.systemd:
+    name: nginx
+    state: stopped
+  ignore_errors: true
+
+- name: Obtain Rancher SSL Certificate
+  ansible.builtin.command:
+    cmd: certbot certonly --standalone -d {{ rancher_domain }} --preferred-challenges http --agree-tos -m {{ email }} --keep-until-expiring
+  register: certbot_result
+  changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+
+- name: Copy rancher.conf to Nginx conf.d
+  template:
+    src: rancher.conf.j2  
+    dest: /etc/nginx/conf.d/rancher.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Replace proxy address in Nginx config
+  ansible.builtin.replace:
+    path: /etc/nginx/conf.d/rancher.conf
+    regexp: 'proxy_pass https://192.168.100.100:443;'
+    replace: "proxy_pass {{ rancher_host }};"
+
+
+- name: Obtain Jenkins SSL Certificate
+  ansible.builtin.command:
+    cmd: certbot certonly --standalone -d {{ jenkins_domain }} --preferred-challenges http --agree-tos -m {{ email }} --keep-until-expiring
+  register: certbot_result
+  changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+
+- name: Copy jenkins.conf to Nginx conf.d
+  template:
+    src: jenkins.conf.j2  
+    dest: /etc/nginx/conf.d/jenkins.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Replace proxy address in Nginx config
+  ansible.builtin.replace:
+    path: /etc/nginx/conf.d/jenkins.conf
+    regexp: 'proxy_pass https://192.168.100.100:8080;'
+    replace: "proxy_pass {{ jenkins_host }};"
+  notify:
+    - Reload Nginx
+
+
+- name: Obtain Nexus SSL Certificate
+  ansible.builtin.command:
+    cmd: certbot certonly --standalone -d {{ nexus_domain }} --preferred-challenges http --agree-tos -m {{ email }} --keep-until-expiring
+  register: certbot_result
+  changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+
+- name: Copy nexus.conf to Nginx conf.d
+  template:
+    src: nexus.conf.j2  
+    dest: /etc/nginx/conf.d/nexus.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Replace proxy address in Nginx config
+  ansible.builtin.replace:
+    path: /etc/nginx/conf.d/nexus.conf
+    regexp: 'proxy_pass https://192.168.100.100:8081;'
+    replace: "proxy_pass {{ nexus_host }};"
+  notify:
+    - Reload Nginx
+
+
+- name: Obtain Vault SSL Certificate
+  ansible.builtin.command:
+    cmd: certbot certonly --standalone -d {{ vault_domain }} --preferred-challenges http --agree-tos -m {{ email }} --keep-until-expiring
+  register: certbot_result
+  changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+
+- name: Copy nexus.conf to Nginx conf.d
+  template:
+    src: vault.conf.j2  
+    dest: /etc/nginx/conf.d/vault.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Replace proxy address in Nginx config
+  ansible.builtin.replace:
+    path: /etc/nginx/conf.d/vault.conf
+    regexp: 'proxy_pass https://192.168.100.100:8200;'
+    replace: "proxy_pass {{ nexus_host }};"
+
+- name: Start Nginx after SSL issuance
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: yes

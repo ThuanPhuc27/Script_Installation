@@ -1,0 +1,1 @@
+ubuntu_version: "{{ ansible_distribution_release | lower }}"

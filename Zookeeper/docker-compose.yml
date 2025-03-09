@@ -1,0 +1,13 @@
+services:
+  zookeeper:
+    image: zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+    networks:
+      - PrviNetwork
+
+networks:
+  PrviNetwork:
+    external: true

@@ -1,0 +1,31 @@
+version: v3
+teleport:
+  nodename: teleport-server
+  data_dir: /var/lib/teleport
+  log:
+    output: stderr
+    severity: INFO
+    format:
+      output: text
+  ca_pin: ""
+  diag_addr: ""
+auth_service:
+  enabled: "yes"
+  listen_addr: 0.0.0.0:3025
+  cluster_name: teleport.lptdevops.website
+  proxy_listener_mode: multiplex
+ssh_service:
+  enabled: "yes"
+proxy_service:
+  enabled: "yes"
+  web_listen_addr: 0.0.0.0:443
+  public_addr: teleport.lptdevops.website:443
+  https_keypairs:
+    - cert_file: /etc/letsencrypt/live/teleport.lptdevops.website/fullchain.pem
+      key_file: /etc/letsencrypt/live/teleport.lptdevops.website/privkey.pem
+  https_keypairs_reload_interval: 0s
+  acme:
+    enabled: "no"
+    email: thuanlephuc152@gmail.com
+    uri: https://acme-v02.api.letsencrypt.org/directory
+                                                          

@@ -1,0 +1,7 @@
+- name: Install Docker & Vault
+  hosts: vault-server
+  become: yes
+  roles:
+    - teleport
+    - docker
+    - vault

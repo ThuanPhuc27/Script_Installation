@@ -1,0 +1,39 @@
+---
+- name: Kill and remove Nexus container if it's running
+  command: docker rm -f {{ nexus_container_name }}
+  ignore_errors: yes
+
+- name: Create directory for Rancher project
+  file:
+    path: /tools/nexus
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml for Nexus to target machine
+  template:
+    src: docker-compose.yml.j2  
+    dest: /tools/nexus/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create docker network if it does not exist
+  docker_network:
+    name: PrviNetwork
+    state: present
+  ignore_errors: true
+
+- name: Run Docker Compose to deploy Nexus
+  command:
+    cmd: "docker-compose -f /tools/nexus/docker-compose.yml up -d"
+    chdir: /tools/nexus
+
+- name: Check if Nexus container is running
+  command: docker ps -q -f name=nexus
+  register: nexus_container
+  failed_when: nexus_container.stdout == ""
+  changed_when: false
+
+- name: Display Nexus container status
+  debug:
+    msg: "Nexus container is up and running."

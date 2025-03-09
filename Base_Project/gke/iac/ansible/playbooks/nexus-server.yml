@@ -1,0 +1,7 @@
+- name: Install Docker & Nexus
+  hosts: nexus-server
+  become: yes
+  roles:
+    - teleport
+    - docker
+    - nexus

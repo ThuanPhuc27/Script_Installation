@@ -1,0 +1,36 @@
+---
+- name: Stop teleport
+  command:
+    cmd: systemctl stop teleport 
+  ignore_errors: true
+
+- name: Kill teleport
+  command:
+    cmd: pkill -f teleport 
+  ignore_errors: true
+
+- name: Remove config file
+  command:
+    cmd: rm -rf /var/lib/teleport 
+  ignore_errors: true
+
+- name: Remove config file
+  command:
+    cmd: rm -f /etc/teleport.yaml 
+  ignore_errors: true
+
+- name: Apt uninstall teleport
+  command:
+    cmd: apt remove -y teleport 
+  ignore_errors: true
+
+- name: Download and install Teleport
+  ansible.builtin.get_url:
+    url: "https://teleport.lptdevops.website/scripts/424bda9cee9a865fd3d97dd76adaf86a/install-node.sh"
+    dest: "/tmp/install-teleport.sh"
+    mode: '0755'
+
+- name: Run Teleport installation script
+  ansible.builtin.command: /tmp/install-teleport.sh
+  register: teleport_install
+  changed_when: teleport_install.rc == 0

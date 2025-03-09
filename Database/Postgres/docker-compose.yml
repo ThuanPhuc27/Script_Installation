@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: golangcookies
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - PrviNetwork
+
+volumes:
+  postgres-data:
+
+networks:
+  PrviNetwork:
+    external: true

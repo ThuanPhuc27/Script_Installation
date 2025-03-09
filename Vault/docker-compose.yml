@@ -1,0 +1,26 @@
+services:
+  vault:
+    image: hashicorp/vault
+    container_name: vault
+    environment:
+      VAULT_ADDR: "https://vault.lptdevops.website:8200"
+      VAULT_API_ADDR: "https://vault.lptdevops.website:8200"
+      VAULT_CLUSTER_ADDR: "https://vault.lptdevops.website:8201"
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    restart: always
+    volumes:
+      - /data/vault/logs:/vault/logs/:rw
+      - /data/vault/data:/vault/data/:rw
+      - /data/vault/config:/vault/config/:rw
+      - /data/vault/file:/vault/file/:rw
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config=/vault/config/config.hcl
+    networks:
+      - PrviNetwork
+
+networks:
+  PrviNetwork:
+    external: true

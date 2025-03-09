@@ -1,0 +1,66 @@
+- name: Install required packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+    update_cache: yes
+
+- name: Add Docker GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: Add Docker repository
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/docker.list
+    line: "deb [signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ubuntu_version }} stable"
+    create: yes
+
+- name: Install Docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: yes
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Add user to Docker group (optional)
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+
+- name: Install Docker Compose
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: Check Docker version
+  command: docker -v
+  register: docker_version
+  changed_when: false
+
+- name: Display Docker version
+  debug:
+    msg: "{{ docker_version.stdout }}"
+
+- name: Check Docker Compose version
+  command: docker-compose -v
+  register: compose_version
+  changed_when: false
+
+- name: Display Docker Compose version
+  debug:
+    msg: "{{ compose_version.stdout }}"

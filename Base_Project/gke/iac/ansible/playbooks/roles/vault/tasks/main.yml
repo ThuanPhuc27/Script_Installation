@@ -1,0 +1,71 @@
+---
+- name: Kill and remove Vault container if it's running
+  command: docker rm -f {{ vault_container_name }}
+  ignore_errors: yes
+
+- name: Create directory for Vault project
+  file:
+    path: /tools/vault
+    state: directory
+    mode: '0755'
+
+- name: Create config directory for Vault project
+  file:
+    path: /tools/vault/config
+    state: directory
+    mode: '0755'
+
+- name: Create data directory for Vault project
+  file:
+    path: /tools/vault/data
+    state: directory
+    mode: '0755'
+
+- name: Create file directory for Vault project
+  file:
+    path: /tools/vault/file
+    state: directory
+    mode: '0755'
+
+- name: Create logs directory for Vault project
+  file:
+    path: /tools/vault/logs
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml for Vault to target machine
+  template:
+    src: docker-compose.yml.j2  
+    dest: /tools/vault/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy config.hcl for Vault to target machine
+  template:
+    src: config.hcl.j2  
+    dest: /tools/vault/config/config.hcl
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create docker network if it does not exist
+  docker_network:
+    name: PrviNetwork
+    state: present
+  ignore_errors: true
+
+- name: Run Docker Compose to deploy Vault
+  command:
+    cmd: "docker-compose -f /tools/vault/docker-compose.yml up -d"
+    chdir: /tools/vault
+
+- name: Check if Vault container is running
+  command: docker ps -q -f name=vault
+  register: vault_container
+  failed_when: vault_container.stdout == ""
+  changed_when: false
+
+- name: Display Vault container status
+  debug:
+    msg: "Vault container is up and running."

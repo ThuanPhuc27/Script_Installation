@@ -1,0 +1,39 @@
+---
+- name: Kill and remove Rancher container if it's running
+  command: docker rm -f {{ rancher_container_name }}
+  ignore_errors: yes
+
+- name: Create directory for Rancher project
+  file:
+    path: /tools/rancher
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml for Rancher to target machine
+  template:
+    src: docker-compose.yml.j2  
+    dest: /tools/rancher/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create docker network if it does not exist
+  docker_network:
+    name: PrviNetwork
+    state: present
+  ignore_errors: true
+
+- name: Run Docker Compose to deploy Rancher
+  command:
+    cmd: "docker-compose -f /tools/rancher/docker-compose.yml up -d"
+    chdir: /tools/rancher
+
+- name: Check if Rancher container is running
+  command: docker ps -q -f name=rancher
+  register: rancher_container
+  failed_when: rancher_container.stdout == ""
+  changed_when: false
+
+- name: Display Rancher container status
+  debug:
+    msg: "Rancher container is up and running."
