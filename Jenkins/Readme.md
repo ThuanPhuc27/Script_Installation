@@ -5,4 +5,4 @@ Plugin:
 - Docker pipeline
 - amazon ECR plugin
 - aws sdk all
-- 
+- Slack Notification 
